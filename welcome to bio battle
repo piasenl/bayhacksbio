@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Battle Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 60%;
+            margin: auto;
+            text-align: center;
+        }
+        h1 {
+            color: green;
+        }
+        .stats {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .battle-log {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Biology Battle!</h1>
+        <div class="stats">
+            <h2>Player Stats</h2>
+            <p id="player-health">Health: 100</p>
+            <p id="player-level">Level: 1</p>
+            <p id="player-exp">Experience: 0</p>
+        </div>
+
+        <div class="battle-log">
+            <h2 id="enemy-message">Click 'Start Battle' to encounter an enemy!</h2>
+            <button onclick="startBattle()">Start Battle</button>
+            <div id="question-area"></div>
+            <input type="text" id="answer" placeholder="Your answer">
+            <button onclick="submitAnswer()">Submit Answer</button>
+        </div>
+    </div>
+
+    <script>
+        async function startBattle() {
+            const response = await fetch('/start_battle');
+            const data = await response.json();
+            document.getElementById('enemy-message').innerText = data.message;
+            getBiologyProblem();
+        }
+
+        async function getBiologyProblem() {
+            const response = await fetch('/biology_problem');
+            const data = await response.json();
+            document.getElementById('question-area').innerHTML = `<p>${data.problem}</p>`;
+            window.correctAnswer = data.answer; // Save for answer submission
+        }
+
+        async function submitAnswer() {
+            const userAnswer = document.getElementById('answer').value;
+            const response = await fetch('/submit_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answer: userAnswer, correct_answer: window.correctAnswer })
+            });
+            const data = await response.json();
+            alert(data.message);
+            document.getElementById('answer').value = ""; // Clear answer input
+        }
+    </script>
+</body>
+</html>
